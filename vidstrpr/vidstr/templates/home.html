@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="cntainer text-center">
+    <div class="row">
+        <div class="col-8"><h1>Welcome</h1><br><br>
+            {% for post in posts %}
+            <div class="card text-bg-light mb-3" style="width: 750px;">
+                {% if post.images != "" %}
+                <img src="{{ post.images.url }}" alt="connect"><br>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-text">{{ post.body }}<br></h5>
+                    <p class="card-text">
+                        <small class="text-muted fw-light">
+                            {{ post.created_at }} By {{ post.user.username }}
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                                <strong>&nbsp;{{ post.number_of_likes }} Likes</strong>
+                            </div>
+                        </small><br>
+                    {% if user.is_authenticated %}
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                        {% if post.like_status %}
+                        <a class="btn btn-light btn-sm" name="post_id" value="{{ post.id }}" href="{% url 'like_post_home' post.id %}" role="button">Like</a>
+                        {% else %}
+                        <a class="btn btn-light btn-sm" name="post_id" value="{{ post.id }}" href="{% url 'like_post_home' post.id %}" role="button">Dislike</a>
+                        {% endif %}
+                    </div><br>
+                    {% endif %}
+                    {% if post.comments.all %}
+                    <div class="card" style="width: 43rem;">
+                        <div class="card-body">
+                            <small style="text-align:left;">
+                                {% for comment in post.comments.all %}
+                                <h6 class="card-title">{{ comment.user_id }}</h6>
+                                <p class="card-subtitle mb-2 text-muted">{{ comment.created_at }}</p>
+                                <p class="card-text">{{ comment.body }}</p>
+                                {% endfor %}
+                            </small><br>
+                            {% endif %}
+                            {% if user.is_authenticated %}
+                            {% if comment_form %}
+                            <form method=POST enctype="multipart/form-data">
+                                {% csrf_token %}
+                                {{ comment_form.as_p }}
+                                <button type="submit" class="btn btn-light btn-sm" name="upload" style="float:left;">Comment</button>
+                            </form>
+                            {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    </p>
+                </div>
+            </div>
+            <br>
+            {% endfor %}
+        </div>
+        {% if user.is_authenticated %}
+        <div class="col-4">
+            <br><br><br><br>
+            {% if form %}
+            <form method=POST enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-secondary">Post</button>
+            </form>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if profile %}
+<div class="cntainer text-center">
+    <div class="row">
+        <div class="card" style="width: 18rem;">
+            {% if profile.profile_image != "" %}
+            <img class="card-img-top" src="{{ profile.profile_image.url }}" alt="Profile Img"><br>
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">Hi {{ profile.user.first_name }}!</h5><br><br>
+                {% if form %}
+                <form method=POST enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-secondary" name="upload">Upload Profile Picture</button>
+                </form><br><br>
+                {% endif %}
+                <div class="card text-center">
+                    <div class="card-header">Follows</div>
+                    <div class="card-body">
+                        <p class="card-text">
+                <h5>Follows</h5>
+                            {% for following in profile.follows.all %}
+                            <a href="{% url 'profile' following.user.id %}">@{{ following }}</a><br>
+                            {% endfor %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-8">
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                <h3>Posts</h3><br><br><br>
+            </div>
+            {% for post in posts %}
+            <div class="card text-bg-light mb-3" style="width: 750px;">
+                {% if post.images != "" %}
+                <img src="{{ post.images.url }}" alt="connect"><br>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-text">{{ post.body }}<br></h5>
+                    <p class="card-text">
+                        <small class="text-muted fw-light">
+                            {{ post.created_at }} By {{ post.user.username }}<br>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                                <strong>&nbsp;{{ post.number_of_likes }} Likes</strong>
+<!--                                <strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 Comments</strong>-->
+                            </div>
+                        </small>
+                    </p>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                        {% if post.like_status %}
+                        <a class="btn btn-light btn-sm" name="post_id" value="{{ post.id }}" href="{% url 'like_post_profile' post.id %}" role="button">Like</a>
+                        {% else %}
+                        <a class="btn btn-light btn-sm" name="post_id" value="{{ post.id }}" href="{% url 'like_post_profile' post.id %}" role="button">Dislike</a>
+                        {% endif %}
+                        <a class="btn btn-light btn-sm" href="{% url 'edit_post' post.id %}" role="button">Edit</a>
+                        <a class="btn btn-light btn-sm" href="{% url 'delete_post' post.id %}" role="button">Delete</a>
+                    </div><br><br>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                        <h5>&nbsp;&nbsp;Comments</h5><br>
+                    </div>
+<!--                    <div class="container">-->
+                    {% if post.comments.all %}
+                    <div class="card" style="width: 43rem;">
+                        <div class="card-body">
+                            <small style="text-align:left;">
+                                {% for comment in post.comments.all %}
+                                <h6 class="card-title">{{ comment.user_id }}</h6>
+                                <p class="card-subtitle mb-2 text-muted">{{ comment.created_at }}</p>
+                                <p class="card-text">{{ comment.body }}</p>
+                                {% endfor %}
+                            </small><br>
+                            {% endif %}
+                            {% if comment_form %}
+                            <form method=POST enctype="multipart/form-data">
+                                {% csrf_token %}
+                                {{ comment_form.as_p }}
+                                <button type="submit" class="btn btn-light btn-sm" name="upload" style="float:left;">Comment</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                        <br>
+
+
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
