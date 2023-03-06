@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Posts, Profile, Comment
+from .models import Posts, Profile, Comment, Message
 
 class RegisterUser(UserCreationForm):
     email = forms.EmailField(label="", widget=forms.TextInput(attrs={"class":"form-control", "placeholder":"Email Address"}))
@@ -75,3 +75,18 @@ class CommentForm(forms.ModelForm):
         self.fields['body'].widget.attrs['class'] = 'form-control'
         self.fields['body'].widget.attrs['style'] = 'height: 2rem;'
         self.fields['body'].label = ''
+
+class MessageForm(forms.ModelForm):
+    message = forms.TextInput()
+
+    class Meta:
+        model = Message
+        fields = ("message",)
+
+    def __init__(self, *args, **kwargs):
+        super(MessageForm, self).__init__(*args, **kwargs)
+
+        self.fields['message'].widget.attrs['class'] = 'form-control'
+        self.fields['message'].widget.attrs['style'] = 'height: 2rem;'
+        self.fields['message'].widget.attrs['placeholder'] = 'Type Message'
+        self.fields['message'].label = ''

@@ -2,11 +2,10 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import post_save
 
-
 # Create your models here.
 #Create a user Profile model
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, related_name='profile', on_delete=models.CASCADE)
     follows = models.ManyToManyField("self",
                                      related_name="followed_by",
                                      symmetrical=False,
@@ -49,6 +48,7 @@ class Posts(models.Model):
             f"{self.likes}"
         )
 
+
 class Comment(models.Model):
     post = models.ForeignKey(Posts, related_name="comments", on_delete=models.CASCADE)
     body = models.TextField()
@@ -57,3 +57,12 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.body
+
+class Message(models.Model):
+    message = models.TextField()
+    user = models.ForeignKey(User, related_name="receiver", on_delete=models.CASCADE)
+    sent_by = models.ForeignKey(User, related_name='sender', on_delete=models.CASCADE)
+    sent_on = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.message

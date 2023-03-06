@@ -19,10 +19,20 @@
                 {% endif %}
                 <div class="card text-center">
                     <div class="card-header">Follows</div>
-                    <div class="card-body">
+                    <div class="card-body" style="max-height: 100px;overflow-y: auto;" id="scroll">
                         <p class="card-text">
-                <h5>Follows</h5>
                             {% for following in profile.follows.all %}
+                            <a href="{% url 'profile' following.user.id %}">@{{ following }}</a><br>
+                            {% endfor %}
+                        </p>
+                    </div>
+                </div>
+                <br>
+                <div class="card text-center">
+                    <div class="card-header">Follwed By</div>
+                    <div class="card-body"  style="max-height: 100px;overflow-y: auto;" id="scroll2">
+                        <p class="card-text">
+                            {% for following in profile.followed_by.all %}
                             <a href="{% url 'profile' following.user.id %}">@{{ following }}</a><br>
                             {% endfor %}
                         </p>
@@ -78,7 +88,7 @@
                             <form method=POST enctype="multipart/form-data">
                                 {% csrf_token %}
                                 {{ comment_form.as_p }}
-                                <button type="submit" class="btn btn-light btn-sm" name="upload" style="float:left;">Comment</button>
+                                <button type="submit" class="btn btn-light btn-sm" name="upload" value="{{ post.id }}" style="float:left;">Comment</button>
                             </form>
                             {% endif %}
                         </div>

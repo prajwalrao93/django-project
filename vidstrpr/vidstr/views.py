@@ -1,9 +1,10 @@
 from django.contrib.auth import authenticate, login, logout
+from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
-from .forms import RegisterUser, PostForm, ProfileForm, CommentForm
+from .forms import RegisterUser, PostForm, ProfileForm, CommentForm, MessageForm
 from django.contrib import messages
-from .models import Posts, Profile, Comment
+from .models import Posts, Profile, Comment, Message
 
 # Create your views here.
 def home(request):
@@ -14,9 +15,10 @@ def home(request):
             cmnt_post = get_object_or_404(Posts, id=ind_post.id)
             comment_form = CommentForm(request.POST, instance=cmnt_post)
             if comment_form.is_valid():
-                Comment.objects.create(body=request.POST["body"], post=Posts.objects.get(id=ind_post.id),
-                                       user_id=request.user)
-                return redirect('home')
+                if request.POST['upload'] == 0:
+                    Comment.objects.create(body=request.POST["body"], post=Posts.objects.get(id=request.POST['upload']),
+                                           user_id=request.user)
+                    return redirect('home')
         if form.is_valid():
             post = form.save(commit=False)
             post.user = request.user
@@ -71,7 +73,7 @@ def profile(request, pk):
                 cmnt_post = get_object_or_404(Posts, id=ind_post.id)
                 comment_form = CommentForm(request.POST, instance=cmnt_post)
                 if comment_form.is_valid():
-                    Comment.objects.create(body=request.POST["body"], post=Posts.objects.get(id=ind_post.id),
+                    Comment.objects.create(body=request.POST["body"], post=Posts.objects.get(id=request.POST['upload']),
                                            user_id=request.user)
                     comment_form = CommentForm()
                     return render(request, 'profile.html', {"profile": profile, "posts": posts, "form": form,
@@ -143,3 +145,29 @@ def like_post_home(request, pk):
     post.save()
     return redirect('home')
 
+def profile_list(request):
+    profiles = Profile.objects.exclude(user_id = request.user.id)
+    if request.method == 'POST':
+        profile = Profile.objects.get(user_id=request.POST['follow'].split(" ")[1])
+        current_profile =  Profile.objects.get(user_id=request.user.id)
+        if 'unfollow' in request.POST['follow']:
+            current_profile.follows.remove(profile)
+        elif 'follow' in request.POST['follow']:
+            current_profile.follows.add(profile)
+    return render(request, 'profile_list.html', {'profiles': profiles})
+
+
+def message_link(request, pk):
+    profile = Profile.objects.get(user_id=pk)
+    message_list = Message.objects.filter(Q(sent_by=request.user) | Q(user=request.user)).order_by('sent_on')
+    message_list = message_list.distinct()
+    form = MessageForm(request.POST)
+    if request.method == 'POST':
+        if form.is_valid():
+            message_rcvd = form.save(commit=False)
+            message_rcvd.sent_by = request.user
+            message_rcvd.user = profile.user
+            message_rcvd.save()
+            return redirect(reverse('message_link', args=[str(pk)]))
+    form = MessageForm()
+    return render(request, 'message_link.html', {'message_list':message_list, 'profile':profile, 'form':form})

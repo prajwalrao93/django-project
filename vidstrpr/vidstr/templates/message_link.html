@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if user.is_authenticated %}
+
+<div class="accordion" id="accordionExample">
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingOne">
+      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+        {{ profile }}
+      </button>
+    </h2>
+    <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+      <div class="accordion-body text-bg-light" style="max-height: 600px;overflow-y: auto;" id="scroll">
+        {% for msg in message_list %}
+        {% if user == msg.sent_by %}
+          <p style="text-align: right">{{ msg.sent_by }} : {{ msg }}</p>
+        {% else %}
+          <p style="text-align: left">{{ msg.sent_by }} : {{ msg }}</p>
+        {% endif %}
+        {% endfor %}
+        <br>
+        {% if form %}
+        <form method=POST enctype="multipart/form-data">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <button type="submit" class="btn btn-secondary" name="upload">Send</button>
+        </form><br><br>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+var objDiv = document.getElementById("scroll");
+objDiv.scrollTop = objDiv.scrollHeight;
+</script>
+{% endif %}
+{% endblock %}

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group, User
-from .models import Profile, Posts, Comment
+from .models import Profile, Posts, Comment, Message
 
 # Register your models here.
 admin.site.unregister(Group)
@@ -24,3 +24,5 @@ admin.site.register(User, UserAdmin)
 admin.site.register(Posts)
 #Register Comments
 admin.site.register(Comment)
+#Register Messages
+admin.site.register(Message)
